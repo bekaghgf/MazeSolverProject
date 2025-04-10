@@ -58,11 +58,30 @@ public class MazeSolverProject {
         }
         return neighbors;
     }
+
+    private static boolean findPath(int x, int y) {
+        if (!isInBounds(x, y) || maze[x][y] != PATH || visited[x][y]) return false;
+        visited[x][y] = true;
+
+        if (x == exit[0] && y == exit[1]) {
+            maze[x][y] = VISITED;
+            return true;
+        }
+
+        int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        for (int[] d : dirs) {
+            if (findPath(x + d[0], y + d[1])) {
+                maze[x][y] = VISITED;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    private static void printMaze(boolean[][] visitedMap) {}
+
+
     private static boolean isInBounds(int x, int y) {
         return x > 0 && y > 0 && x < rows - 1 && y < cols - 1;
     }
-
-    private static boolean findPath(int x, int y) { return false; }
-    private static void printMaze(boolean[][] visitedMap) {}
-
 }

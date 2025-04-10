@@ -13,12 +13,29 @@ public class MazeSolverProject {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter number of rows (min. 10): ");
-        int rows = scanner.nextInt();
+        rows = scanner.nextInt();
         System.out.print("Enter number of columns (min. 10): ");
-        int cols = scanner.nextInt();
-        System.out.println("Sizes: " + rows + " x " + cols);
+        cols = scanner.nextInt();
+
+        if (rows < 10 || cols < 10) {
+            System.out.println("The size of the maze must be at least 10x10.");
+            return;
+        }
+
+        if (rows % 2 == 0) rows++;
+        if (cols % 2 == 0) cols++;
+
+        start = new int[]{1, 1};
+        exit = new int[]{rows - 2, cols - 2};
+
+        maze = new char[rows][cols];
+        visited = new boolean[rows][cols];
+
 
     }
+
+
+
     private static void generateMaze() {
         for (int i = 0; i < rows; i++)
             Arrays.fill(maze[i], WALL);
@@ -43,6 +60,8 @@ public class MazeSolverProject {
                 stack.pop();
             }
         }
+        maze[exit[0]][exit[1]] = PATH;
+
     }
 
     private static List<int[]> getUnvisitedNeighbors(int[] cell) {
@@ -92,7 +111,7 @@ public class MazeSolverProject {
             System.out.println();
         }
     }
-    
+
     private static boolean isInBounds(int x, int y) {
         return x > 0 && y > 0 && x < rows - 1 && y < cols - 1;
     }

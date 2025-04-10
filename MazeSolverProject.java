@@ -78,9 +78,21 @@ public class MazeSolverProject {
 
         return false;
     }
-    private static void printMaze(boolean[][] visitedMap) {}
 
 
+    private static void printMaze(boolean[][] visitedMap) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (visitedMap != null && maze[i][j] == VISITED) {
+                    System.out.print(VISITED);
+                } else {
+                    System.out.print(maze[i][j]);
+                }
+            }
+            System.out.println();
+        }
+    }
+    
     private static boolean isInBounds(int x, int y) {
         return x > 0 && y > 0 && x < rows - 1 && y < cols - 1;
     }

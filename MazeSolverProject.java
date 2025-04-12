@@ -31,6 +31,20 @@ public class MazeSolverProject {
         maze = new char[rows][columns];
         visited = new boolean[rows][columns];
 
+        generateMaze();
+
+        System.out.println("\nGenerated Maze:");
+        printMaze(null);
+
+        boolean pathFound = findPath(startPosition[0], startPosition[1]);
+
+        if (pathFound) {
+            System.out.println("\nPath found:");
+        } else {
+            System.out.println("\nNo path found.");
+        }
+
+        printMaze(visited);
 
     }
 

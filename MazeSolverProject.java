@@ -37,37 +37,46 @@ public class MazeSolverProject {
 
 
     private static void generateMaze() {
+        //The method of generating a maze using the DFS algorithm
         for (int i = 0; i < rows; i++)
-            Arrays.fill(maze[i], WALL);
+            Arrays.fill(maze[i], WALL); //We fill the whole maze with walls
 
-        maze[start[0]][start[1]] = PATH;
+        maze[start[0]][start[1]] = PATH;//The initial cell becomes a passage
+
         Random rand = new Random();
         Stack<int[]> stack = new Stack<>();
         stack.push(start);
+        //We create a random generator and a stack for the generation algorithm
 
-        while (!stack.isEmpty()) {
+        while (!stack.isEmpty()) //As long as there is room to move, we continue to generate
+            {
             int[] current = stack.peek();
             List<int[]> neighbors = getUnvisitedNeighbors(current);
+            //We take the current cell and find the neighbors into which we can "dig" (through 2 cells)
 
             if (!neighbors.isEmpty()) {
-                int[] next = neighbors.get(rand.nextInt(neighbors.size()));
+                int[] next = neighbors.get(rand.nextInt(neighbors.size())); //If there are options, choose a random neighbor
+
                 int wallX = (current[0] + next[0]) / 2;
                 int wallY = (current[1] + next[1]) / 2;
                 maze[wallX][wallY] = PATH;
                 maze[next[0]][next[1]] = PATH;
-                stack.push(next);
-            } else {
+                stack.push(next); //Remove the wall between the current and the next cell and move forward
+
+            } else { //If there's nowhere to go, we roll back
                 stack.pop();
             }
+
         }
-        maze[exit[0]][exit[1]] = PATH;
+        maze[exit[0]][exit[1]] = PATH; //EXIT
 
     }
 
     private static List<int[]> getUnvisitedNeighbors(int[] cell) {
-        List<int[]> neighbors = new ArrayList<>();
-        int[][] dirs = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}};
+        //Returns a list of neighbors that can be reached (moving through one wall)
 
+        List<int[]> neighbors = new ArrayList<>();
+        int[][] dirs = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}};  // Possible directions of movement (up, down, right, left – through 2 cells)
         for (int[] d : dirs) {
             int x = cell[0] + d[0];
             int y = cell[1] + d[1];
@@ -75,20 +84,21 @@ public class MazeSolverProject {
                 neighbors.add(new int[]{x, y});
             }
         }
-        return neighbors;
+        return neighbors;  //We check whether the neighbors are within the limits and have not yet been visited – we add them to the list
     }
 
     private static boolean findPath(int x, int y) {
+        //Recursive search for a path from point x,y to the exit
         if (!isInBounds(x, y) || maze[x][y] != PATH || visited[x][y]) return false;
         visited[x][y] = true;
 
         if (x == exit[0] && y == exit[1]) {
             maze[x][y] = VISITED;
-            return true;
+            return true; //If you have reached the exit, the path is found
         }
 
         int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
-        for (int[] d : dirs) {
+        for (int[] d : dirs) {  //We're trying to move in every direction
             if (findPath(x + d[0], y + d[1])) {
                 maze[x][y] = VISITED;
                 return true;
@@ -99,7 +109,7 @@ public class MazeSolverProject {
     }
 
 
-    private static void printMaze(boolean[][] visitedMap) {
+    private static void printMaze(boolean[][] visitedMap) { //Maze printing method
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (visitedMap != null && maze[i][j] == VISITED) {
@@ -108,11 +118,11 @@ public class MazeSolverProject {
                     System.out.print(maze[i][j]);
                 }
             }
-            System.out.println();
+            System.out.println(); //We go through each cell and print either a wall, a path, or a point, if it has been visited
         }
     }
 
-    private static boolean isInBounds(int x, int y) {
+    private static boolean isInBounds(int x, int y) { //Checking whether the cell is within the bounds, not counting the boundaries
         return x > 0 && y > 0 && x < rows - 1 && y < cols - 1;
     }
 }

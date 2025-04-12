@@ -7,29 +7,29 @@ public class MazeSolverProject {
 
     private static char[][] maze;
     private static boolean[][] visited;
-    private static int rows, cols;
-    private static int[] start, exit;
+    private static int rows, columns;
+    private static int[] startPosition, exitPosition;
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter number of rows (min. 10): ");
         rows = scanner.nextInt();
         System.out.print("Enter number of columns (min. 10): ");
-        cols = scanner.nextInt();
+        columns = scanner.nextInt();
 
-        if (rows < 10 || cols < 10) {
+        if (rows < 10 || columns < 10) {
             System.out.println("The size of the maze must be at least 10x10.");
             return;
         }
 
         if (rows % 2 == 0) rows++;
-        if (cols % 2 == 0) cols++;
+        if (columns % 2 == 0) columns++;
 
-        start = new int[]{1, 1};
-        exit = new int[]{rows - 2, cols - 2};
+        startPosition = new int[]{1, 1};
+        exitPosition = new int[]{rows - 2, columns - 2};
 
-        maze = new char[rows][cols];
-        visited = new boolean[rows][cols];
+        maze = new char[rows][columns];
+        visited = new boolean[rows][columns];
 
 
     }
@@ -41,34 +41,34 @@ public class MazeSolverProject {
         for (int i = 0; i < rows; i++)
             Arrays.fill(maze[i], WALL); //We fill the whole maze with walls
 
-        maze[start[0]][start[1]] = PATH;//The initial cell becomes a passage
+        maze[startPosition[0]][startPosition[1]] = PATH;//The initial cell becomes a passage
 
         Random rand = new Random();
-        Stack<int[]> stack = new Stack<>();
-        stack.push(start);
+        Stack<int[]> cellStack = new Stack<>();
+        cellStack.push(startPosition);
         //We create a random generator and a stack for the generation algorithm
 
-        while (!stack.isEmpty()) //As long as there is room to move, we continue to generate
+        while (!cellStack.isEmpty()) //As long as there is room to move, we continue to generate
             {
-            int[] current = stack.peek();
-            List<int[]> neighbors = getUnvisitedNeighbors(current);
+            int[] currentCell = cellStack.peek();
+            List<int[]> unvisitedNeighbors = getUnvisitedNeighbors(currentCell);
             //We take the current cell and find the neighbors into which we can "dig" (through 2 cells)
 
-            if (!neighbors.isEmpty()) {
-                int[] next = neighbors.get(rand.nextInt(neighbors.size())); //If there are options, choose a random neighbor
+            if (!unvisitedNeighbors.isEmpty()) {
+                int[] nextCell = unvisitedNeighbors.get(rand.nextInt(unvisitedNeighbors.size())); //If there are options, choose a random neighbor
 
-                int wallX = (current[0] + next[0]) / 2;
-                int wallY = (current[1] + next[1]) / 2;
-                maze[wallX][wallY] = PATH;
-                maze[next[0]][next[1]] = PATH;
-                stack.push(next); //Remove the wall between the current and the next cell and move forward
+                int wallRow = (currentCell[0] + nextCell[0]) / 2;
+                int wallCol = (currentCell[1] + nextCell[1]) / 2;
+                maze[wallRow][wallCol] = PATH;
+                maze[nextCell[0]][nextCell[1]] = PATH;
+                cellStack.push(nextCell); //Remove the wall between the current and the next cell and move forward
 
             } else { //If there's nowhere to go, we roll back
-                stack.pop();
+                cellStack.pop();
             }
 
         }
-        maze[exit[0]][exit[1]] = PATH; //EXIT
+        maze[exitPosition[0]][exitPosition[1]] = PATH; //EXIT
 
     }
 
@@ -76,31 +76,34 @@ public class MazeSolverProject {
         //Returns a list of neighbors that can be reached (moving through one wall)
 
         List<int[]> neighbors = new ArrayList<>();
-        int[][] dirs = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}};  // Possible directions of movement (up, down, right, left – through 2 cells)
-        for (int[] d : dirs) {
-            int x = cell[0] + d[0];
-            int y = cell[1] + d[1];
-            if (isInBounds(x, y) && maze[x][y] == WALL) {
-                neighbors.add(new int[]{x, y});
+        int[][] directions = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}};  // Possible directions of movement (up, down, right, left – through 2 cells)
+        for (int[] direction : directions) {
+            int neighborRow = cell[0] + direction[0];
+            int neighborCol = cell[1] + direction[1];
+            if (isInBounds(neighborRow, neighborCol) && maze[neighborRow][neighborCol] == WALL) {
+                neighbors.add(new int[]{neighborRow, neighborCol});
             }
         }
         return neighbors;  //We check whether the neighbors are within the limits and have not yet been visited – we add them to the list
     }
 
-    private static boolean findPath(int x, int y) {
+    private static boolean findPath(int row, int col) {
         //Recursive search for a path from point x,y to the exit
-        if (!isInBounds(x, y) || maze[x][y] != PATH || visited[x][y]) return false;
-        visited[x][y] = true;
+        if (!isInBounds(row, col) || maze[row][col] != PATH || visited[row][col]) return false;
+        visited[row][col] = true;
 
-        if (x == exit[0] && y == exit[1]) {
-            maze[x][y] = VISITED;
+        if (row == exitPosition[0] && col == exitPosition[1]) {
+            maze[row][col] = VISITED;
             return true; //If you have reached the exit, the path is found
         }
 
-        int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
-        for (int[] d : dirs) {  //We're trying to move in every direction
-            if (findPath(x + d[0], y + d[1])) {
-                maze[x][y] = VISITED;
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        for (int[] direction : directions) {//We're trying to move in every direction
+            int nextRow = row + direction[0];
+            int nextCol = col + direction[1];
+
+            if (findPath(nextRow, nextCol)) {
+                maze[row][col] = VISITED;
                 return true;
             }
         }
@@ -111,7 +114,7 @@ public class MazeSolverProject {
 
     private static void printMaze(boolean[][] visitedMap) { //Maze printing method
         for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
+            for (int j = 0; j < columns; j++) {
                 if (visitedMap != null && maze[i][j] == VISITED) {
                     System.out.print(VISITED);
                 } else {
@@ -123,6 +126,6 @@ public class MazeSolverProject {
     }
 
     private static boolean isInBounds(int x, int y) { //Checking whether the cell is within the bounds, not counting the boundaries
-        return x > 0 && y > 0 && x < rows - 1 && y < cols - 1;
+        return x > 0 && y > 0 && x < rows - 1 && y < columns - 1;
     }
 }
